@@ -3,111 +3,99 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>単色ロゴ工房</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@600;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<title>AI Logo Create</title>
+
+<!-- ▼小塚ゴシックを全員に表示したい場合、Adobe Fontsのkitリンクをここに貼る（手順は下部。無くても動きます）
+<link rel="stylesheet" href="https://use.typekit.net/xxxxxxx.css">
+-->
+
 <style>
   :root{
-    --paper:#efeadc; --paper-2:#e7e1cf; --ink:#17150f; --ink-soft:#4a463b;
-    --seal:#b5382e; --seal-ink:#8f2a22; --line:rgba(23,21,15,.18); --line-2:rgba(23,21,15,.10);
+    --font-main:"AXIS Std","AXIS Font","axis-std","kozuka-gothic-pr6n","Kozuka Gothic Pr6N","小塚ゴシック Pr6N","小塚ゴシック","Hiragino Kaku Gothic ProN","Yu Gothic","Meiryo",sans-serif;
+    --bg:#ffffff; --card:#f6f5f2; --ink:#1a1a1a; --ink-soft:#6f6f6f;
+    --accent:#b5382e; --accent-ink:#8f2a22; --line:rgba(0,0,0,.14); --line-2:rgba(0,0,0,.07);
     --radius:2px;
   }
   *{box-sizing:border-box}
   html,body{margin:0}
-  body{
-    background:var(--paper);color:var(--ink);
-    font-family:"Zen Kaku Gothic New",system-ui,sans-serif;line-height:1.6;
-    -webkit-font-smoothing:antialiased;
-    background-image:radial-gradient(var(--line-2) .5px,transparent .5px);background-size:14px 14px;
-  }
+  body{background:var(--bg);color:var(--ink);font-family:var(--font-main);line-height:1.6;-webkit-font-smoothing:antialiased}
   .wrap{max-width:860px;margin:0 auto;padding:28px 20px 80px}
+
   header{border-bottom:1.5px solid var(--ink);padding-bottom:16px;margin-bottom:28px}
-  .eyebrow{font-family:"Space Mono",monospace;font-size:11px;letter-spacing:.22em;
-    text-transform:uppercase;color:var(--ink-soft);margin:0 0 6px}
-  h1{font-family:"Shippori Mincho",serif;font-weight:800;font-size:34px;margin:0;letter-spacing:.04em}
+  .eyebrow{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 6px}
+  h1{font-weight:800;font-size:32px;margin:0;letter-spacing:.02em}
   .lead{margin:8px 0 0;color:var(--ink-soft);font-size:14px}
 
   .step{margin:0 0 34px}
   .step-h{display:flex;align-items:baseline;gap:10px;margin:0 0 14px}
-  .step-n{font-family:"Space Mono",monospace;font-size:12px;color:var(--seal-ink);
-    border:1.5px solid var(--seal);border-radius:50%;width:24px;height:24px;
-    display:grid;place-items:center;flex:0 0 auto;font-weight:700}
-  .step-t{font-family:"Shippori Mincho",serif;font-weight:600;font-size:19px;margin:0}
+  .step-n{font-size:12px;color:var(--accent-ink);border:1.5px solid var(--accent);border-radius:50%;
+    width:24px;height:24px;display:grid;place-items:center;flex:0 0 auto;font-weight:700}
+  .step-t{font-weight:700;font-size:19px;margin:0}
 
   .types{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
   @media(min-width:620px){.types{grid-template-columns:repeat(3,1fr)}}
-  .type{position:relative;text-align:left;background:var(--paper-2);border:1.5px solid var(--line);
-    border-radius:var(--radius);padding:14px 14px 12px;cursor:pointer;
-    transition:border-color .15s,transform .05s;font:inherit;color:inherit}
+  .type{position:relative;text-align:left;background:var(--card);border:1.5px solid var(--line);
+    border-radius:var(--radius);padding:14px 14px 12px;cursor:pointer;transition:border-color .15s,transform .05s;font:inherit;color:inherit}
   .type:hover{border-color:var(--ink-soft)}
   .type:active{transform:translateY(1px)}
-  .type.sel{border-color:var(--seal);box-shadow:inset 0 0 0 1px var(--seal)}
+  .type.sel{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
   .type .glyph{width:38px;height:38px;margin-bottom:8px;color:var(--ink)}
   .type .glyph svg{width:100%;height:100%;display:block}
   .type .jp{font-weight:700;font-size:14px;display:block}
-  .type .en{font-family:"Space Mono",monospace;font-size:10px;letter-spacing:.12em;
-    color:var(--ink-soft);text-transform:uppercase;display:block;margin-top:1px}
+  .type .en{font-size:10px;letter-spacing:.12em;color:var(--ink-soft);text-transform:uppercase;display:block;margin-top:1px}
   .type .desc{font-size:11.5px;color:var(--ink-soft);margin-top:6px;line-height:1.45}
-  .type .tick{position:absolute;top:8px;right:8px;color:var(--seal);opacity:0;font-size:14px;font-weight:700}
+  .type .tick{position:absolute;top:8px;right:8px;color:var(--accent);opacity:0;font-size:14px;font-weight:700}
   .type.sel .tick{opacity:1}
 
   label.field{display:block;margin:0 0 16px}
-  .field .cap{font-family:"Space Mono",monospace;font-size:11px;letter-spacing:.14em;
-    text-transform:uppercase;color:var(--ink-soft);margin-bottom:6px}
-  input[type=text],textarea{width:100%;background:#fbf8ef;border:1.5px solid var(--line);
-    border-radius:var(--radius);padding:11px 12px;font:inherit;color:var(--ink);resize:vertical}
-  input[type=text]:focus,textarea:focus{outline:none;border-color:var(--seal)}
+  .field .cap{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:6px}
+  input[type=text],textarea{width:100%;background:#fff;border:1.5px solid var(--line);border-radius:var(--radius);
+    padding:11px 12px;font:inherit;color:var(--ink);resize:vertical}
+  input[type=text]:focus,textarea:focus{outline:none;border-color:var(--accent)}
   textarea{min-height:88px}
   .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
-  .chip{font-size:11.5px;background:transparent;border:1px solid var(--line);border-radius:20px;
-    padding:4px 10px;cursor:pointer;color:var(--ink-soft);font-family:inherit}
-  .chip:hover{border-color:var(--seal);color:var(--seal-ink)}
+  .chip{font-size:11.5px;background:transparent;border:1px solid var(--line);border-radius:20px;padding:4px 10px;cursor:pointer;color:var(--ink-soft);font-family:inherit}
+  .chip:hover{border-color:var(--accent);color:var(--accent-ink)}
   .colorrow{display:flex;align-items:center;gap:10px}
-  input[type=color]{width:44px;height:34px;padding:0;border:1.5px solid var(--line);
-    border-radius:var(--radius);background:none;cursor:pointer}
-  .hex{font-family:"Space Mono",monospace;font-size:13px;color:var(--ink-soft)}
+  input[type=color]{width:44px;height:34px;padding:0;border:1.5px solid var(--line);border-radius:var(--radius);background:none;cursor:pointer}
+  .hex{font-size:13px;color:var(--ink-soft)}
 
-  .go{margin-top:6px;background:var(--seal);color:#fff;border:none;border-radius:var(--radius);
-    font-family:"Zen Kaku Gothic New",sans-serif;font-weight:700;font-size:15px;
-    padding:13px 22px;cursor:pointer;letter-spacing:.04em;transition:background .15s,transform .05s}
-  .go:hover{background:var(--seal-ink)}
+  .go{margin-top:6px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius);
+    font-family:var(--font-main);font-weight:700;font-size:15px;padding:13px 22px;cursor:pointer;letter-spacing:.04em;transition:background .15s,transform .05s}
+  .go:hover{background:var(--accent-ink)}
   .go:active{transform:translateY(1px)}
-  .go:disabled{background:#b9b3a3;cursor:not-allowed}
+  .go:disabled{background:#bdbdbd;cursor:not-allowed}
 
   #resultStep{display:none}
-  .hint{font-size:12px;color:var(--ink-soft);margin:0 0 12px;font-family:"Space Mono",monospace;letter-spacing:.08em}
+  .hint{font-size:12px;color:var(--ink-soft);margin:0 0 12px;letter-spacing:.08em}
   .grid4{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:480px;margin:0 auto}
-  .cand{position:relative;background:#fbf8ef;border:1.5px solid var(--line);border-radius:var(--radius);
-    aspect-ratio:1/1;display:grid;place-items:center;padding:15%;cursor:pointer;
-    transition:border-color .15s}
+  .cand{position:relative;background:#fff;border:1.5px solid var(--line);border-radius:var(--radius);
+    aspect-ratio:1/1;display:grid;place-items:center;padding:15%;cursor:pointer;transition:border-color .15s}
   .cand:hover{border-color:var(--ink-soft)}
-  .cand.sel{border-color:var(--seal);box-shadow:inset 0 0 0 1px var(--seal)}
+  .cand.sel{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
   .cand .mark{width:100%;height:100%}
   .cand .mark svg{width:100%;height:100%;display:block}
   .cand.stamp .mark{animation:stamp .28s ease-out}
   @keyframes stamp{from{opacity:0;transform:scale(1.03)}to{opacity:1;transform:scale(1)}}
-  .cand .no{position:absolute;top:7px;left:8px;font-family:"Space Mono",monospace;font-size:10px;color:var(--ink-soft)}
-  .cand .tick{position:absolute;top:6px;right:8px;color:var(--seal);opacity:0;font-weight:700;font-size:13px}
+  .cand .no{position:absolute;top:7px;left:8px;font-size:10px;letter-spacing:.1em;color:var(--ink-soft)}
+  .cand .tick{position:absolute;top:6px;right:8px;color:var(--accent);opacity:0;font-weight:700;font-size:13px}
   .cand.sel .tick{opacity:1}
-  .cand.err{color:var(--seal-ink);font-size:11.5px;text-align:center;cursor:default;padding:12%}
+  .cand.err{color:var(--accent-ink);font-size:11.5px;text-align:center;cursor:default}
   .cand.err:hover{border-color:var(--line)}
-  .spin{display:inline-block;width:20px;height:20px;border:2.5px solid var(--line);
-    border-top-color:var(--seal);border-radius:50%;animation:sp .7s linear infinite}
+  .spin{display:inline-block;width:20px;height:20px;border:2.5px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:sp .7s linear infinite}
   @keyframes sp{to{transform:rotate(360deg)}}
 
   .actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:18px}
-  .act{background:transparent;border:1.5px solid var(--ink);border-radius:var(--radius);
-    font:inherit;font-size:13px;font-weight:500;padding:9px 14px;cursor:pointer;color:var(--ink)}
-  .act:hover{background:var(--ink);color:var(--paper)}
+  .act{background:transparent;border:1.5px solid var(--ink);border-radius:var(--radius);font:inherit;font-size:13px;font-weight:500;padding:9px 14px;cursor:pointer;color:var(--ink)}
+  .act:hover{background:var(--ink);color:#fff}
   .act:disabled{opacity:.4;cursor:not-allowed}
   .act:disabled:hover{background:transparent;color:var(--ink)}
   .act.mini{border-color:var(--line);color:var(--ink-soft)}
-  .act.mini:hover{background:var(--paper-2);color:var(--ink)}
+  .act.mini:hover{background:var(--card);color:var(--ink)}
 
   .note{font-size:12px;color:var(--ink-soft);text-align:center;margin-top:14px;line-height:1.6}
   .status{min-height:20px;text-align:center;font-size:13px;margin-top:12px}
-  .status.err{color:var(--seal-ink);font-weight:500}
+  .status.err{color:var(--accent-ink);font-weight:500}
   .status .spin{width:13px;height:13px;border-width:2px;vertical-align:-2px;margin-right:6px}
   @media(prefers-reduced-motion:reduce){*{animation:none!important}}
 </style>
@@ -115,8 +103,8 @@
 <body>
 <div class="wrap">
   <header>
-    <p class="eyebrow">Single-color logo studio</p>
-    <h1>単色ロゴ工房</h1>
+    <p class="eyebrow">Single-color vector logo generator</p>
+    <h1>AI Logo Create</h1>
     <p class="lead">種類を選び、イメージを書くだけ。4案を生成し、Illustratorで編集できる一色のベクター（SVG）で書き出せます。</p>
   </header>
 
@@ -139,8 +127,8 @@
     <label class="field">
       <div class="cap">色</div>
       <div class="colorrow">
-        <input type="color" id="color" value="#171512">
-        <span class="hex" id="hex">#171512</span>
+        <input type="color" id="color" value="#1a1a1a">
+        <span class="hex" id="hex">#1a1a1a</span>
         <span style="font-size:12px;color:var(--ink-soft)">（あとで変更・書き出しできます）</span>
       </div>
     </label>
@@ -158,7 +146,7 @@
       <button class="act mini" id="dlPng" disabled>PNGで書き出し</button>
       <button class="act mini" id="again">4案を作り直す</button>
     </div>
-    <p class="note">ワードマーク/レターマークは文字を含みます。Illustratorで開いたら「書式 → アウトラインを作成」でパス化すると安全です。</p>
+    <p class="note">ワードマーク/レターフォーム/エンブレムは文字を含みます。Illustratorで開いたら「書式 → アウトラインを作成」でパス化すると安全です。</p>
   </section>
 </div>
 
@@ -166,25 +154,26 @@
 /* ============================================================
    設定：Cloudflare WorkerのURLをここに貼る（末尾スラッシュ無し）
    ============================================================ */
-const CONFIG = { WORKER_URL: "https://logo-create.takashi-nakashima-photography.workers.dev" };
+const CONFIG = { WORKER_URL: "https://ここをあなたのWorker-URLに.workers.dev" };
 
+/* 参考URL準拠の6種 */
 const TYPES = [
-  {id:"wordmark",   jp:"ワードマーク",     en:"Wordmark",    desc:"ブランド名の文字そのものをロゴに",
-    glyph:`<svg viewBox="0 0 48 48" fill="currentColor"><text x="24" y="31" text-anchor="middle" font-family="Shippori Mincho,serif" font-size="20" font-weight="800">名</text></svg>`, needName:true},
-  {id:"lettermark", jp:"レターマーク",     en:"Lettermark", desc:"頭文字・モノグラム",
-    glyph:`<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><rect x="12" y="12" width="24" height="24"/><path d="M18 32V18l6 8 6-8v14" stroke-linejoin="round" stroke-linecap="round"/></svg>`, needName:true},
-  {id:"pictorial",  jp:"ピクトリアル",     en:"Pictorial",  desc:"具象的なシンボル・絵柄",
-    glyph:`<svg viewBox="0 0 48 48" fill="currentColor"><path d="M24 8c6 8 12 12 12 20a12 12 0 0 1-24 0c0-8 6-12 12-20z"/></svg>`, needName:false},
-  {id:"abstract",   jp:"アブストラクト",   en:"Abstract",   desc:"抽象的な幾何マーク",
+  {id:"abstract",  jp:"抽象シンボル",   en:"Abstract",  desc:"抽象的な幾何マーク",
     glyph:`<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="19" cy="24" r="9"/><circle cx="29" cy="24" r="9"/></svg>`, needName:false},
-  {id:"combination",jp:"コンビネーション", en:"Combination",desc:"シンボル＋ブランド名",
-    glyph:`<svg viewBox="0 0 48 48" fill="currentColor"><circle cx="24" cy="17" r="7"/><rect x="12" y="30" width="24" height="4" rx="2"/></svg>`, needName:true},
-  {id:"emblem",     jp:"エンブレム",       en:"Emblem",     desc:"文字を枠で囲むバッジ型",
+  {id:"pictorial", jp:"イラストシンボル", en:"Pictorial", desc:"具象的なアイコン・絵柄",
+    glyph:`<svg viewBox="0 0 48 48" fill="currentColor"><path d="M24 8c6 8 12 12 12 20a12 12 0 0 1-24 0c0-8 6-12 12-20z"/></svg>`, needName:false},
+  {id:"mascot",    jp:"マスコット",     en:"Mascot",    desc:"キャラクター・マスコット",
+    glyph:`<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><circle cx="24" cy="24" r="13"/><circle cx="19" cy="22" r="1.6" fill="currentColor" stroke="none"/><circle cx="29" cy="22" r="1.6" fill="currentColor" stroke="none"/><path d="M19 29c1.6 1.6 8.4 1.6 10 0" stroke-linecap="round"/></svg>`, needName:false},
+  {id:"wordmark",  jp:"ワードマーク",   en:"Wordmark",  desc:"ブランド名の文字そのもの",
+    glyph:`<svg viewBox="0 0 48 48" fill="currentColor"><text x="24" y="31" text-anchor="middle" font-size="18" font-weight="800">Aa</text></svg>`, needName:true},
+  {id:"letterform",jp:"レターフォーム", en:"Letterform",desc:"頭文字を象ったマーク",
+    glyph:`<svg viewBox="0 0 48 48" fill="currentColor"><text x="24" y="37" text-anchor="middle" font-size="36" font-weight="800">A</text></svg>`, needName:true},
+  {id:"emblem",    jp:"エンブレム",     en:"Emblem",    desc:"文字を枠で囲むバッジ型",
     glyph:`<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><circle cx="24" cy="24" r="15"/><rect x="17" y="21" width="14" height="6" rx="1" fill="currentColor" stroke="none"/></svg>`, needName:true}
 ];
 const EXAMPLE_CHIPS = ["ミニマルで幾何的","手仕事っぽい素朴さ","丸みのある優しい線","和のモダン","力強い直線的"];
 
-let state = { type:"pictorial", color:"#171512", cands:[], sel:-1 };
+let state = { type:"pictorial", color:"#1a1a1a", cands:[], sel:-1 };
 
 const typesEl=document.getElementById("types");
 TYPES.forEach(t=>{
@@ -262,7 +251,7 @@ function fillSlot(i,svg,err){
   el.className="cand stamp";
   el.innerHTML=`<span class="no">0${i+1}</span><span class="tick">✓</span><div class="mark">${clean||""}</div>`;
   el.onclick=()=>select(i);
-  if(state.sel===-1) select(i);  // 最初に来た1案を自動選択
+  if(state.sel===-1) select(i);
 }
 
 function select(i){
@@ -285,7 +274,7 @@ function renderAll(){
 function setStatus(html,cls){statusEl.className="status"+(cls?" "+cls:"");statusEl.innerHTML=html;}
 function escapeHtml(s){return s.replace(/[&<>]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[m]));}
 
-/* --- SVGを単色化（多色が来ても必ず一色に） --- */
+/* SVGを単色化（多色が来ても必ず一色に） */
 function normalizeSvg(raw,color){
   const doc=new DOMParser().parseFromString(raw,"image/svg+xml");
   const svg=doc.querySelector("svg");if(!svg)return null;
@@ -307,7 +296,7 @@ function normalizeSvg(raw,color){
   return new XMLSerializer().serializeToString(svg);
 }
 
-/* --- 書き出し（選択中の1案） --- */
+/* 書き出し（選択中の1案） */
 function current(){return state.sel>=0?state.cands[state.sel]:null;}
 document.getElementById("dlSvg").addEventListener("click",()=>{const c=current();if(c)downloadBlob(new Blob([c.clean],{type:"image/svg+xml"}),"logo.svg");});
 document.getElementById("copySvg").addEventListener("click",async e=>{

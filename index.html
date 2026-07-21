@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AI Logo Create</title>
 
-<!-- ▼小塚ゴシックを全員に表示したい場合、Adobe Fontsのkitリンクをここに貼る（手順は下部。無くても動きます）
+<!-- ▼小塚ゴシックを全員に表示したい場合、Adobe Fontsのkitリンクをここに貼る（無くても動きます）
 <link rel="stylesheet" href="https://use.typekit.net/xxxxxxx.css">
 -->
 
@@ -39,7 +39,7 @@
   .type:hover{border-color:var(--ink-soft)}
   .type:active{transform:translateY(1px)}
   .type.sel{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
-  .type .glyph{width:38px;height:38px;margin-bottom:8px;color:var(--ink)}
+  .type .glyph{display:block;width:38px;height:38px;margin-bottom:8px;color:var(--ink)}
   .type .glyph svg{width:100%;height:100%;display:block}
   .type .jp{font-weight:700;font-size:14px;display:block}
   .type .en{font-size:10px;letter-spacing:.12em;color:var(--ink-soft);text-transform:uppercase;display:block;margin-top:1px}
@@ -156,7 +156,6 @@
    ============================================================ */
 const CONFIG = { WORKER_URL: "https://logo-create.takashi-nakashima-photography.workers.dev" };
 
-/* 参考URL準拠の6種 */
 const TYPES = [
   {id:"abstract",  jp:"抽象シンボル",   en:"Abstract",  desc:"抽象的な幾何マーク",
     glyph:`<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="19" cy="24" r="9"/><circle cx="29" cy="24" r="9"/></svg>`, needName:false},
@@ -274,7 +273,6 @@ function renderAll(){
 function setStatus(html,cls){statusEl.className="status"+(cls?" "+cls:"");statusEl.innerHTML=html;}
 function escapeHtml(s){return s.replace(/[&<>]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[m]));}
 
-/* SVGを単色化（多色が来ても必ず一色に） */
 function normalizeSvg(raw,color){
   const doc=new DOMParser().parseFromString(raw,"image/svg+xml");
   const svg=doc.querySelector("svg");if(!svg)return null;
@@ -296,7 +294,6 @@ function normalizeSvg(raw,color){
   return new XMLSerializer().serializeToString(svg);
 }
 
-/* 書き出し（選択中の1案） */
 function current(){return state.sel>=0?state.cands[state.sel]:null;}
 document.getElementById("dlSvg").addEventListener("click",()=>{const c=current();if(c)downloadBlob(new Blob([c.clean],{type:"image/svg+xml"}),"logo.svg");});
 document.getElementById("copySvg").addEventListener("click",async e=>{

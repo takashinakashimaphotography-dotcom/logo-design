@@ -268,7 +268,7 @@ async function fetchOne(brand,desc,variant){
     body:JSON.stringify({type:state.type,brandName:brand,description:desc,variant})
   });
   const data=await res.json();
-  if(!res.ok||data.error) throw new Error((data.error||"生成失敗")+(data.detail?"："+String(data.detail).slice(0,120):""));
+　if(!res.ok||data.error) throw new Error((data.error||"生成失敗")+(data.detail?"："+String(data.detail).slice(0,600):""));
   if(!data.svg) throw new Error("空の応答");
   return data.svg;
 }

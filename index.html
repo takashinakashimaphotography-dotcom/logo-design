@@ -82,6 +82,7 @@
   .cand.sel .tick{opacity:1}
   .cand.err{color:var(--accent-ink);font-size:11.5px;text-align:center;cursor:default}
   .cand.err:hover{border-color:var(--line)}
+  .cand.wait{color:var(--ink-soft);font-size:11px;text-align:center}
   .spin{display:inline-block;width:20px;height:20px;border:2.5px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:sp .7s linear infinite}
   @keyframes sp{to{transform:rotate(360deg)}}
 
@@ -154,7 +155,11 @@
 /* ============================================================
    設定：Cloudflare WorkerのURLをここに貼る（末尾スラッシュ無し）
    ============================================================ */
-const CONFIG = { WORKER_URL: "https://logo-create.takashi-nakashima-photography.workers.dev" };
+const CONFIG = {
+  WORKER_URL: "https://logo-create.takashi-nakashima-photography.workers.dev",
+  GAP_MS: 5000,      // 各案の生成間隔（無料枠のRPM対策。長くするほど429が減る）
+  MAX_RETRY: 3       // 429時の自動リトライ回数
+};
 
 const TYPES = [
   {id:"abstract",  jp:"抽象シンボル",   en:"Abstract",  desc:"抽象的な幾何マーク",
@@ -172,7 +177,7 @@ const TYPES = [
 ];
 const EXAMPLE_CHIPS = ["ミニマルで幾何的","手仕事っぽい素朴さ","丸みのある優しい線","和のモダン","力強い直線的"];
 
-let state = { type:"pictorial", color:"#1a1a1a", cands:[], sel:-1 };
+let state = { type:"pictorial", color:"#1a1a1a", cands:[], sel:-1, running:false };
 
 const typesEl=document.getElementById("types");
 TYPES.forEach(t=>{
@@ -196,7 +201,10 @@ const goEl=document.getElementById("go"),statusEl=document.getElementById("statu
 goEl.addEventListener("click",generate);
 document.getElementById("again").addEventListener("click",generate);
 
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+
 async function generate(){
+  if(state.running)return;
   const brand=document.getElementById("brand").value.trim();
   const desc=document.getElementById("desc").value.trim();
   const meta=TYPES.find(t=>t.id===state.type);
@@ -204,26 +212,54 @@ async function generate(){
   if(!desc&&!brand){setStatus("イメージを一言でも入力してください。","err");return;}
   if(CONFIG.WORKER_URL.includes("ここを")){setStatus("先に index.html の WORKER_URL を設定してください。","err");return;}
 
+  state.running=true;
   goEl.disabled=true;
-  setStatus('<span class="spin"></span>4案を生成中…（15〜30秒ほど）',"");
   document.getElementById("resultStep").style.display="block";
   document.getElementById("resultStep").scrollIntoView({behavior:"smooth",block:"start"});
   setActions(false);
   state.cands=[null,null,null,null];state.sel=-1;
   gridEl.innerHTML="";
   for(let i=0;i<4;i++){
-    const c=document.createElement("div");c.className="cand";c.dataset.i=i;
-    c.innerHTML=`<span class="no">0${i+1}</span><span class="spin"></span>`;
+    const c=document.createElement("div");c.className="cand wait";c.dataset.i=i;
+    c.innerHTML=`<span class="no">0${i+1}</span><div>待機中…</div>`;
     gridEl.appendChild(c);
   }
 
-  const jobs=[0,1,2,3].map(i=>fetchOne(brand,desc,i+1)
-    .then(svg=>fillSlot(i,svg,null))
-    .catch(e=>fillSlot(i,null,e.message)));
-  await Promise.allSettled(jobs);
+  // 1本ずつ順番に生成（429を避ける）
+  for(let i=0;i<4;i++){
+    setSlotSpinner(i);
+    setStatus(`<span class="spin"></span>生成中… ${i+1}/4`,"");
+    try{
+      const svg=await fetchOneWithRetry(brand,desc,i+1,i);
+      fillSlot(i,svg,null);
+    }catch(e){
+      fillSlot(i,null,e.message);
+    }
+    if(i<3) await sleep(CONFIG.GAP_MS); // 次の案まで間隔をあける
+  }
+
+  state.running=false;
   goEl.disabled=false;
   const okCount=state.cands.filter(c=>c&&c.ok).length;
-  setStatus(okCount?"":"すべて生成に失敗しました。少し待ってやり直すか、下のエラーを確認してください。",okCount?"":"err");
+  setStatus(okCount?`${okCount}件できました。`:"生成に失敗しました。少し待ってやり直してください。",okCount?"":"err");
+}
+
+async function fetchOneWithRetry(brand,desc,variant,slot){
+  let wait=CONFIG.GAP_MS;
+  for(let attempt=0;attempt<=CONFIG.MAX_RETRY;attempt++){
+    try{
+      return await fetchOne(brand,desc,variant);
+    }catch(e){
+      const is429=/\(429\)|混雑|429/.test(e.message);
+      if(is429 && attempt<CONFIG.MAX_RETRY){
+        setSlotWait(slot,`混雑中…再試行 ${Math.round(wait/1000)}秒後`);
+        await sleep(wait);
+        wait=Math.round(wait*1.6); // だんだん待ち時間を延ばす
+        continue;
+      }
+      throw e;
+    }
+  }
 }
 
 async function fetchOne(brand,desc,variant){
@@ -235,6 +271,15 @@ async function fetchOne(brand,desc,variant){
   if(!res.ok||data.error) throw new Error((data.error||"生成失敗")+(data.detail?"："+String(data.detail).slice(0,120):""));
   if(!data.svg) throw new Error("空の応答");
   return data.svg;
+}
+
+function setSlotSpinner(i){
+  const el=gridEl.querySelector(`.cand[data-i="${i}"]`);
+  if(el){el.className="cand";el.innerHTML=`<span class="no">0${i+1}</span><span class="spin"></span>`;}
+}
+function setSlotWait(i,msg){
+  const el=gridEl.querySelector(`.cand[data-i="${i}"]`);
+  if(el){el.className="cand wait";el.innerHTML=`<span class="no">0${i+1}</span><div>${escapeHtml(msg)}</div>`;}
 }
 
 function fillSlot(i,svg,err){
